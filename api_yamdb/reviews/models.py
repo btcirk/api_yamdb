@@ -1,11 +1,16 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+User = get_user_model()
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     """
     Одно произведение может быть привязано к нескольким жанрам.
     """
     name = models.CharField(
+        max_length=200,
         verbose_name='Жанр произведения'
     )
     slug = models.SlugField(
@@ -17,7 +22,7 @@ class Genres(models.Model):
         return self.name
 
 
-class Categories(models.Model):
+class Category(models.Model):
     """
     Категории (типы) произведений ("Фильмы", "Книги" , "Музыка").
     """
@@ -35,27 +40,55 @@ class Categories(models.Model):
         return self.name
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """
     Произведения, к которым пишут отзывы (определенный фильм,
     книга или песенка)
     """
-    name = models.CharField()
+    name = models.CharField(max_length=200)
     year = models.IntegerField()
     description = models.TextField(
         null=True,
         blank=True
     )
     genre = models.ManyToManyField(
-        Genres,
+        Genre,
         related_name='titles',
         blank=True
     )
     category = models.ForeignKey(
-        Categories,
+        Category,
         on_delete=models.SET_NULL,
-        related_name='titles'
+        related_name='titles',
+        null=True
     )
+    rating = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    text = models.TextField()
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE)
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE)
+    score = models.IntegerField(default=5,
+                                validators=[MaxValueValidator(10),
+                                            MinValueValidator(1)
+                                            ])
+
+    def __str__(self):
+        return self.text
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE)
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE)
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата добавления', auto_now_add=True, db_index=True)
