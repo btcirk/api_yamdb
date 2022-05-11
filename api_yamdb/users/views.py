@@ -9,6 +9,7 @@ from .serializers import UserSerializer
 
 
 def send_code(recipient, confirmation_code):
+    """Отправка кода подтверждения на email пользователя."""
     status = send_mail(
         'Код подтверждения',
         f'Здравствуйте, используйте этот код подтверждения '
@@ -22,6 +23,7 @@ def send_code(recipient, confirmation_code):
 
 @api_view(['POST'])
 def signup(request):
+    """Регистрация пользователя и отправка кода подтверждения на его email."""
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
