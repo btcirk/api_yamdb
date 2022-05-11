@@ -4,7 +4,6 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     def create(self, validated_data):
         if self.validated_data['username'] == 'me':
             raise serializers.ValidationError('Can\'t use these username')
