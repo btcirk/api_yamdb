@@ -3,9 +3,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, TokenSerializer
 
 
 def send_code(recipient, confirmation_code):
@@ -19,6 +21,14 @@ def send_code(recipient, confirmation_code):
         fail_silently=False,
     )
     return status
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
 
 
 @api_view(['POST'])
@@ -36,7 +46,28 @@ def signup(request):
         try:
             send_code(user.email, user.confirmation_code)
         except:
-            print("Ошибка отпрравки email с кодом подтверждения")
+            print("Ошибка отправки email с кодом подтверждения")
         return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def token(request):
+    """Получение JWT-токена в обмен на username и confirmation_code."""
+    serializer = TokenSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            user = get_object_or_404(get_user_model(),
+                                     serializer.initial_data['username'])
+        except:
+            return Response(serializer.errors,
+                            status=status.HTTP_404_NOT_FOUND)
+        confirmation_code = serializer.initial_data['confirmation_code']
+        if user.confirmation_code == confirmation_code:
+            tokens = get_tokens_for_user(user)
+            return Response(tokens, status=status.HTTP_200_OK)
+        return Response('Неверный confirmation_code',
+                        status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
