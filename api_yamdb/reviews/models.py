@@ -6,30 +6,63 @@ User = get_user_model()
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
+    """
+    Одно произведение может быть привязано к нескольким жанрам.
+    """
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Жанр произведения'
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Адрес для страницы жанр'
+    )
 
     def __str__(self):
         return self.name
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
+    """
+    Категории (типы) произведений ("Фильмы", "Книги" , "Музыка").
+    """
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Категория произведения'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='Адрес для страницы категории'
+    )
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True)
-    description = models.TextField(blank=True)
-    rating = models.IntegerField(blank=True, null=True)
-    genre = models.ManyToManyField(
-        Genre)
+    """
+    Произведения, к которым пишут отзывы (определенный фильм,
+    книга или песенка)
+    """
     name = models.CharField(max_length=200)
     year = models.IntegerField()
+    description = models.TextField(
+        null=True,
+        blank=True
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        related_name='titles',
+        blank=True
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        null=True
+    )
+    rating = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
