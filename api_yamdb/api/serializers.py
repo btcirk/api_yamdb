@@ -1,8 +1,11 @@
-from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Title, Review, Comment  # ,Genre, Category
+from django.forms import SlugField
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
+
+import datetime as dt
+
+from reviews.models import Title, Genre, Category, Review, Comment
 
 
 class CurrentTitleDefault(object):
@@ -24,11 +27,21 @@ class CurrentCommentDefault(object):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    # author = SlugRelatedField(slug_field='username', read_only=True)
+    genre = GenreSerilizer(many=True)
+    category = CategorySerializer()
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
         model = Title
+
+    def validate_year(self, value):
+        year = dt.date.today().year
+        if value > year:
+            raise serializers.ValidationError('Год выпуска не может быть больше текущего!')
+        return value
+
+    def create(self, validated_data):
+        pass
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -55,3 +68,32 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
+
+        
+class CategorySerializer(serializers.ModelSerializer):
+    slug = SlugField(
+        validators = [
+            UniqueValidator(
+                queryset=Category.objects.all(),
+                message='Поле slug каждой категории должно быть уникальным'
+            )
+        ]
+    )
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class GenreSerilizer(serializers.ModelSerializer):
+    slug = SlugField(
+        validators = [
+            UniqueValidator(
+                queryset=Genre.objects.all(),
+                message='Поле slug каждой категории должно быть уникальным'
+            )
+        ]
+    )
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
