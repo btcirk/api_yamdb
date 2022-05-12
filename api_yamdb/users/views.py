@@ -22,12 +22,12 @@ def send_code(recipient, confirmation_code):
     )
     return status
 
-def get_tokens_for_user(user):
-    refresh = RefreshToken.for_user(user)
 
+def get_tokens_for_user(user):
+    """Генерация токена для доступа к API."""
+    refresh = RefreshToken.for_user(user)
     return {
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
+        'token': str(refresh.access_token)
     }
 
 
@@ -45,7 +45,7 @@ def signup(request):
         user.save()
         try:
             send_code(user.email, user.confirmation_code)
-        except:
+        except Exception:
             print("Ошибка отправки email с кодом подтверждения")
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
@@ -57,12 +57,8 @@ def token(request):
     """Получение JWT-токена в обмен на username и confirmation_code."""
     serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():
-        try:
-            user = get_object_or_404(get_user_model(),
-                                     serializer.initial_data['username'])
-        except:
-            return Response(serializer.errors,
-                            status=status.HTTP_404_NOT_FOUND)
+        username = serializer.initial_data['username']
+        user = get_object_or_404(get_user_model(), username=username)
         confirmation_code = serializer.initial_data['confirmation_code']
         if user.confirmation_code == confirmation_code:
             tokens = get_tokens_for_user(user)
