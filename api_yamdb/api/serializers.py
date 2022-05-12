@@ -14,6 +14,15 @@ class CurrentTitleDefault(object):
         return self.title_id
 
 
+class CurrentCommentDefault(object):
+
+    def set_context(self, serializer_field):
+        self.review_id = serializer_field.context['view'].kwargs['review_id']
+
+    def __call__(self):
+        return self.review_id
+
+
 class TitleSerializer(serializers.ModelSerializer):
     # author = SlugRelatedField(slug_field='username', read_only=True)
 
@@ -41,53 +50,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(slug_field='username', read_only=True)
+    review = serializers.HiddenField(default=CurrentCommentDefault())
 
     class Meta:
         fields = '__all__'
         model = Comment
-# class CommentSerializer(serializers.ModelSerializer):
-#     author = serializers.SlugRelatedField(
-#         read_only=True, slug_field='username'
-#     )
-
-#     class Meta:
-#         fields = '__all__'
-#         model = Comment
-#         read_only_fields = ('post',)
-
-
-# class FollowSerializer(serializers.ModelSerializer):
-#     user = SlugRelatedField(slug_field='username', read_only=True,
-#                             default=serializers.CurrentUserDefault())
-#     following = SlugRelatedField(slug_field='username',
-#                                  queryset=User.objects.all())
-
-#     class Meta:
-#         model = Follow
-#         fields = '__all__'
-#         validators = [
-#             UniqueTogetherValidator(
-#                 queryset=Follow.objects.all(),
-#                 fields=('user', 'following')
-#             )
-#         ]
-
-#     def validate(self, data):
-#         if not data['following']:
-#             raise serializers.ValidationError('заполните поле following')
-#         elif data['following'] == self._context['request'].user:
-#             raise serializers.ValidationError('Подписаться на'
-#                                               'самого себя невозможно')
-#         return data
-
-
-# class GroupSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Group
-#         fields = '__all__'
-
-
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = '__all__'
