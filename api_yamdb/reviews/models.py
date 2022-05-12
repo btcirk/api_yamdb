@@ -53,6 +53,7 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
+        # through='GenreTitle',
         related_name='titles',
         blank=True
     )
