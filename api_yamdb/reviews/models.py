@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
@@ -62,7 +63,7 @@ class Title(models.Model):
         related_name='titles',
         null=True
     )
-    rating = models.IntegerField(blank=True, null=True)
+    rating = models.IntegerField(blank=True, default=5)
 
     def __str__(self):
         return self.name
@@ -79,6 +80,12 @@ class Review(models.Model):
                                 validators=[MaxValueValidator(10),
                                             MinValueValidator(1)
                                             ])
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['author', 'title'],
+                             name='unique_author_title')
+        ]
 
     def __str__(self):
         return self.text
