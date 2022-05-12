@@ -33,6 +33,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
             score_old = review.score
             rating_new = (title.rating * count + score - score_old) / (count)
         else:
+            count = 1 if count == 0 else count
             rating_new = (title.rating * (count - 1) + score) / (count)
         title.rating = rating_new
         title.save()
