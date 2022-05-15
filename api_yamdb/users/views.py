@@ -1,13 +1,15 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+# from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+
 from .serializers import UserSerializer, TokenSerializer
+from .models import User
 
 
 def send_code(recipient, confirmation_code):
@@ -21,6 +23,7 @@ def send_code(recipient, confirmation_code):
         fail_silently=False,
     )
     return status
+
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
@@ -38,7 +41,7 @@ def signup(request):
     if serializer.is_valid():
         serializer.save()
         token_generator = PasswordResetTokenGenerator()
-        user = get_user_model().objects.get(
+        user = User.objects.get(
             username=serializer.initial_data['username'])
         confirmation_code = token_generator.make_token(user=user)
         user.confirmation_code = confirmation_code
@@ -58,7 +61,7 @@ def token(request):
     serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():
         try:
-            user = get_object_or_404(get_user_model(),
+            user = get_object_or_404(User,
                                      serializer.initial_data['username'])
         except:
             return Response(serializer.errors,

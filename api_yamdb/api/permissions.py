@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 moderator = ('PATCH', 'DEL')
 moderator_role = ('u', 'a')
+admin_role = ('a',)
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
@@ -34,12 +35,17 @@ class OnlyAuthenticated(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated
 
-      
+
 class IsAdminOrReadOnlyPermission(permissions.BasePermission):
+
     def has_permission(self, request, view):
-        if request.user.is_anonymous:
-            return False
-        return (
-            request.method in permissions.SAFE_METHODS
-            or request.user.role == 'a'
-        )
+        return (request.method in permissions.SAFE_METHODS
+                or (request.user.is_authenticated
+                    and request.user.role in admin_role))
+
+
+class IsAdminPermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return (request.user.is_authenticated
+                and request.user.role in admin_role)

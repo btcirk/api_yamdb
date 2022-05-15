@@ -1,9 +1,9 @@
 
-from django.forms import SlugField
-from rest_framework import serializers
-from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
-
 import datetime as dt
+
+from rest_framework import serializers
+from rest_framework.serializers import SlugRelatedField
+from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from reviews.models import Title, Genre, Category, Review, Comment
 
@@ -26,22 +26,67 @@ class CurrentCommentDefault(object):
         return self.review_id
 
 
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+        validators = [
+            UniqueValidator(
+                queryset=Category.objects.all(),
+                message='Поле slug каждой категории должно быть уникальным'
+            )
+        ]
+
+
+class GenreSerilizer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
+        validators = [
+            UniqueValidator(
+                queryset=Genre.objects.all(),
+                message='Поле slug каждой категории должно быть уникальным'
+            )
+        ]
+
+
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerilizer(many=True)
     category = CategorySerializer()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
+        model = Title
+
+
+class TitleSerializerPost(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+
+    class Meta:
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
         model = Title
 
     def validate_year(self, value):
         year = dt.date.today().year
         if value > year:
-            raise serializers.ValidationError('Год выпуска не может быть больше текущего!')
+            raise serializers.ValidationError(
+                'Год выпуска не может быть больше текущего!'
+            )
         return value
-
-    def create(self, validated_data):
-        pass
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -68,32 +113,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
-
-        
-class CategorySerializer(serializers.ModelSerializer):
-    slug = SlugField(
-        validators = [
-            UniqueValidator(
-                queryset=Category.objects.all(),
-                message='Поле slug каждой категории должно быть уникальным'
-            )
-        ]
-    )
-
-    class Meta:
-        fields = ('name', 'slug')
-        model = Category
-
-
-class GenreSerilizer(serializers.ModelSerializer):
-    slug = SlugField(
-        validators = [
-            UniqueValidator(
-                queryset=Genre.objects.all(),
-                message='Поле slug каждой категории должно быть уникальным'
-            )
-        ]
-    )
-    class Meta:
-        fields = ('name', 'slug')
-        model = Genre
