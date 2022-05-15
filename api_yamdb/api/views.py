@@ -1,25 +1,23 @@
-from rest_framework import viewsets
-from rest_framework import filters
-from rest_framework import mixins
-
+from rest_framework import viewsets, filters, mixins
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 
 from reviews.models import Title, Review, Comment, Genre, Category
-
 from users.models import User
-from users.serializers import UserSerializer
 
+from users.serializers import UserSerializer
 from .serializers import TitleSerializer, TitleSerializerPost
 from .serializers import ReviewSerializer, CommentSerializer
-from .serializers import GenreSerilizer, CategorySerializer
+from .serializers import GenreSerilizer, CategorySerializer, UserSerializer
 from .permissions import IsAdminOrReadOnlyPermission, IsAdminPermission
-from .permissions import AuthorOrReadOnly, ReadOnly
+from .permissions import AuthorOrReadOnly, ReadOnly, OpenAll
 
 
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminPermission,)
+    pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 

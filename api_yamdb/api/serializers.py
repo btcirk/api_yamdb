@@ -1,11 +1,12 @@
-
 import datetime as dt
 
+from django.forms import SlugField
 from rest_framework import serializers
 from rest_framework.serializers import SlugRelatedField
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 
 from reviews.models import Title, Genre, Category, Review, Comment
+from users.models import User
 
 
 class CurrentTitleDefault(object):
@@ -51,6 +52,34 @@ class GenreSerilizer(serializers.ModelSerializer):
             )
         ]
 
+#class GenreSerilizer(serializers.ModelSerializer):
+#    slug = SlugField(
+#        validators = [
+#            UniqueValidator(
+#                queryset=Genre.objects.all(),
+#                message='Поле slug каждой категории должно быть уникальным'
+#            )
+#        ]
+#    )
+#    class Meta:
+#        fields = ('name', 'slug')
+#        model = Genre
+
+
+#class CategorySerializer(serializers.ModelSerializer):
+#    slug = SlugField(
+#        validators = [
+#            UniqueValidator(
+#                queryset=Category.objects.all(),
+#                message='Поле slug каждой категории должно быть уникальным'
+#            )
+#        ]
+#    )
+#
+#    class Meta:
+#        fields = ('name', 'slug')
+#        model = Category
+
 
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerilizer(many=True)
@@ -90,7 +119,7 @@ class TitleSerializerPost(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True,
+    author = serializers.SlugRelatedField(slug_field='username', read_only=True,
                               default=serializers.CurrentUserDefault())
     title = serializers.HiddenField(default=CurrentTitleDefault())
 
@@ -107,9 +136,16 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True)
+    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
     review = serializers.HiddenField(default=CurrentCommentDefault())
 
     class Meta:
         fields = '__all__'
         model = Comment
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        model = User
