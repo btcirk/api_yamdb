@@ -22,3 +22,6 @@ class User(AbstractUser):
                             default=USER)
     bio = models.TextField('Биография', blank=True)
     confirmation_code = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.username

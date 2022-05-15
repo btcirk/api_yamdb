@@ -5,6 +5,7 @@ from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 import datetime as dt
 
 from reviews.models import Title, Genre, Category, Review, Comment
+from users.models import User
 
 
 class CurrentTitleDefault(object):
@@ -96,3 +97,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        model = User

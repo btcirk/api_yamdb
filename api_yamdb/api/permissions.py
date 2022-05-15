@@ -43,3 +43,10 @@ class IsAdminOrReadOnlyPermission(permissions.BasePermission):
             request.method in permissions.SAFE_METHODS
             or request.user.role == 'a'
         )
+
+
+class IsAdminPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            return False
+        return request.user.role == 'a'
