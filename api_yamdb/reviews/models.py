@@ -1,9 +1,10 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import UniqueConstraint
+from users.models import User
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class Genre(models.Model):
@@ -46,28 +47,48 @@ class Title(models.Model):
     Произведения, к которым пишут отзывы (определенный фильм,
     книга или песенка)
     """
-    name = models.CharField(max_length=200)
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название'
+    )
     year = models.IntegerField()
     description = models.TextField(
+        verbose_name='Описание',
         null=True,
         blank=True
     )
     genre = models.ManyToManyField(
         Genre,
-        # through='GenreTitle',
-        related_name='titles',
-        blank=True
+        through='GenreTitle',
+        verbose_name='Жанр'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
-        null=True
+        null=True,
+        verbose_name='Категория'
     )
-    rating = models.IntegerField(blank=True, default=5)
+    rating = models.IntegerField(
+        blank=True,
+        default=5
+    )
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение'
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='Жанр'
+    )
 
 
 class Review(models.Model):

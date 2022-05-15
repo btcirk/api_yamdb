@@ -1,14 +1,16 @@
-from rest_framework import viewsets
-from rest_framework import filters
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets, filters, mixins
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 
 from reviews.models import Title, Review, Comment, Genre, Category
 from users.models import User
-from .serializers import TitleSerializer, ReviewSerializer, CommentSerializer
+
+from users.serializers import UserSerializer
+from .serializers import TitleSerializer, TitleSerializerPost
+from .serializers import ReviewSerializer, CommentSerializer
 from .serializers import GenreSerilizer, CategorySerializer, UserSerializer
-from .permissions import IsAdminOrReadOnlyPermission, AuthorOrReadOnly, ReadOnly, OpenAll
-from .permissions import IsAdminPermission
+from .permissions import IsAdminOrReadOnlyPermission, IsAdminPermission
+from .permissions import AuthorOrReadOnly, ReadOnly, OpenAll
 
 
 class UsersViewSet(viewsets.ModelViewSet):
@@ -20,35 +22,40 @@ class UsersViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class ListCreateDestroyViewSet(
+    mixins.CreateModelMixin, mixins.ListModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    pass
+
+
+class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnlyPermission,)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerilizer
     permission_classes = (IsAdminOrReadOnlyPermission,)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnlyPermission,)
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
 
-    
-class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-    permission_classes = (OpenAll,)
+    def get_serializer_class(self):
+        if self.action in ('retrieve', 'list'):
+            return TitleSerializer
+        return TitleSerializerPost
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
