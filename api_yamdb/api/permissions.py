@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
-moderator = ('PATCH', 'DEL')
-moderator_role = ('user', 'admin')
+moderator = ('PATCH', 'DELETE')
+moderator_role = ('moderator', 'admin')
 admin_role = ('admin',)
 
 
@@ -50,7 +50,7 @@ class IsAdminPermission(permissions.BasePermission):
         return (request.user.is_authenticated
                 and request.user.role in admin_role)
 
-#class IsAdminPermission(permissions.BasePermission):
+# class IsAdminPermission(permissions.BasePermission):
 #    def has_permission(self, request, view):
 #        if request.user.is_anonymous:
 #            return False

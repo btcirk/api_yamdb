@@ -8,7 +8,7 @@ User = get_user_model()
 ALREDY_LOADED_ERROR_MESSAGE = 'База не пустая, загрузка отменена'
 
 model_file_csv = [
-    # {'model': User, 'path': 'users.csv'},
+    {'model': User, 'path': 'users.csv'},
     {'model': Category, 'path': 'category.csv'},
     # {'model': Comment, 'path': 'comments.csv'},
     {'model': Genre, 'path': 'genre.csv'},
@@ -24,11 +24,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        for row in DictReader(open('./static/data/users.csv',
-                              encoding="utf-8-sig")):
-            model_save = User(id=row['id'], username=row['username'],
-                              email=row['email'])
-            model_save.save()
+        # for row in DictReader(open('./static/data/users.csv',
+        #                       encoding="utf-8-sig")):
+        #     model_save = User(id=row['id'], username=row['username'],
+        #                       email=row['email'])
+        #     model_save.save()
 
         for file_csv in model_file_csv:
             model = file_csv['model']
