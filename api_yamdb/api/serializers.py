@@ -145,7 +145,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
+    #username = serializers.CharField(max_length=150, required=True)
+    #email = serializers.EmailField(required=True)
     class Meta:
         fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
         model = User
