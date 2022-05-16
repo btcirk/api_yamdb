@@ -4,12 +4,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 
 from .serializers import UserSerializer, TokenSerializer
-from .models import User
+
+User = get_user_model()
 
 
 def send_code(recipient, confirmation_code):
@@ -60,7 +61,7 @@ def token(request):
     serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():
         username = serializer.initial_data['username']
-        user = get_object_or_404(get_user_model(), username=username)
+        user = get_object_or_404(User, username=username)
         confirmation_code = serializer.initial_data['confirmation_code']
         if user.confirmation_code == confirmation_code:
             tokens = get_tokens_for_user(user)
