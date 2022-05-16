@@ -3,9 +3,9 @@ from django.db import models
 
 
 class User(AbstractUser):
-    ADMIN = 'a'
-    MODERATOR = 'm'
-    USER = 'u'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
 
     ROLE_CHOICES = (
         (ADMIN, 'admin'),

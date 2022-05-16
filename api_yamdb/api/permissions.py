@@ -1,8 +1,8 @@
 from rest_framework import permissions
 
 moderator = ('PATCH', 'DEL')
-moderator_role = ('u', 'a')
-admin_role = ('a',)
+moderator_role = ('user', 'admin')
+admin_role = ('admin',)
 
 
 class AuthorOrReadOnly(permissions.BasePermission):
