@@ -1,4 +1,5 @@
 import datetime as dt
+from email.policy import default
 
 from django.forms import SlugField
 from rest_framework import serializers
@@ -32,12 +33,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Category
-    #    validators = [
-    #        UniqueValidator(
-    #            queryset=Category.objects.all(),
-    #            message='Поле slug каждой категории должно быть уникальным'
-    #        )
-    #    ]
 
 
 class GenreSerilizer(serializers.ModelSerializer):
@@ -45,12 +40,7 @@ class GenreSerilizer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genre
-   #     validators = [
-   #         UniqueValidator(
-   #             queryset=Genre.objects.all(),
-   #             message='Поле slug каждой категории должно быть уникальным'
-   #         )
-   #     ]
+
 
 #class GenreSerilizer(serializers.ModelSerializer):
 #    slug = SlugField(

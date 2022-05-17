@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import viewsets, filters, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -46,7 +48,6 @@ class ListCreateDestroyViewSet(
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
-    lookup_field = 'slug'
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnlyPermission,)
     pagination_class = LimitOffsetPagination
@@ -57,7 +58,6 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
-    lookup_field = 'slug'
     serializer_class = GenreSerilizer
     permission_classes = (IsAdminOrReadOnlyPermission,)
     pagination_class = LimitOffsetPagination
@@ -69,7 +69,9 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnlyPermission,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'year')
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
@@ -87,6 +89,8 @@ class ReviewsViewSet(viewsets.ModelViewSet):
     def rating_calculation(serializer, update):
         title_id = serializer.context['view'].kwargs['title_id']
         title = get_object_or_404(Title, pk=title_id)
+        if title.rating is None:
+            title.rating = 0
         score = serializer.validated_data['score']
         count = Review.objects.filter(title__pk=title_id).count()
         if update:
