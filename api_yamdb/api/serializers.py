@@ -149,10 +149,29 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=100, required=False)
-    last_name = serializers.CharField(max_length=100, required=False)
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+    bio = serializers.CharField(required=False)
+
+    #def partial_update(self, instance, validated_data):
+    #    instance.email = validated_data.get('email', instance.email)
+    #    instance.username = validated_data.get('username', instance.username)
+    #    instance.first_name = validated_data.get('first_name', instance.first_name)
+    #    instance.last_name = validated_data.get('last_name', instance.last_name)
+    #    instance.bio = validated_data.get('bio', instance.bio)
+    #    instance.save()
+    #    return instance
 
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
+        #read_only_fields = ('role',)
+
+
+class MeSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(max_length=150, required=True)
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+    bio = serializers.CharField(required=False)
