@@ -70,8 +70,8 @@ class Title(models.Model):
         verbose_name='Категория'
     )
     rating = models.IntegerField(
-        blank=True,
-        default=5
+        null=True,
+        default=None
     )
 
     def __str__(self):

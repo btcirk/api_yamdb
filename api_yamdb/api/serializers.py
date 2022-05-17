@@ -1,4 +1,5 @@
 import datetime as dt
+from email.policy import default
 
 from django.forms import SlugField
 from rest_framework import serializers
@@ -32,12 +33,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Category
-        # validators = [
-        #     UniqueValidator(
-        #         queryset=Category.objects.all(),
-        #         message='Поле slug каждой категории должно быть уникальным'
-        #     )
-        # ]
 
 
 class GenreSerilizer(serializers.ModelSerializer):
@@ -45,14 +40,9 @@ class GenreSerilizer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genre
-        # validators = [
-        #     UniqueValidator(
-        #         queryset=Genre.objects.all(),
-        #         message='Поле slug каждой категории должно быть уникальным'
-        #     )
-        # ]
 
-# class GenreSerilizer(serializers.ModelSerializer):
+
+#class GenreSerilizer(serializers.ModelSerializer):
 #    slug = SlugField(
 #        validators = [
 #            UniqueValidator(
@@ -149,10 +139,13 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=100, required=False)
-    last_name = serializers.CharField(max_length=100, required=False)
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+    bio = serializers.CharField(required=False)
+    #role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'], read_only=True)
 
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
+        #read_only_fields = ('role',)
