@@ -66,7 +66,7 @@ class GenreSerilizer(serializers.ModelSerializer):
 #        model = Genre
 
 
-#class CategorySerializer(serializers.ModelSerializer):
+# class CategorySerializer(serializers.ModelSerializer):
 #    slug = SlugField(
 #        validators = [
 #            UniqueValidator(
@@ -119,8 +119,11 @@ class TitleSerializerPost(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True,
-                              default=serializers.CurrentUserDefault())
+    DefUser = serializers.CurrentUserDefault()
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True,
+                                          default=DefUser)
+
     title = serializers.HiddenField(default=CurrentTitleDefault())
 
     class Meta:
@@ -136,7 +139,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
     review = serializers.HiddenField(default=CurrentCommentDefault())
 
     class Meta:
@@ -147,6 +151,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=100, required=False)
     last_name = serializers.CharField(max_length=100, required=False)
+
     class Meta:
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
         model = User

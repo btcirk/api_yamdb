@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets, filters, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -45,6 +46,7 @@ class ListCreateDestroyViewSet(
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
+    lookup_field = 'slug'
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnlyPermission,)
     pagination_class = LimitOffsetPagination
@@ -55,6 +57,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
+    lookup_field = 'slug'
     serializer_class = GenreSerilizer
     permission_classes = (IsAdminOrReadOnlyPermission,)
     pagination_class = LimitOffsetPagination
@@ -83,25 +86,24 @@ class ReviewsViewSet(viewsets.ModelViewSet):
     @staticmethod
     def rating_calculation(serializer, update):
         title_id = serializer.context['view'].kwargs['title_id']
-        title = Title.objects.get(pk=title_id)
+        title = get_object_or_404(Title, pk=title_id)
         score = serializer.validated_data['score']
         count = Review.objects.filter(title__pk=title_id).count()
         if update:
             review_id = serializer.context['view'].kwargs['pk']
-            review = Review.objects.get(pk=review_id)
+            review = get_object_or_404(Review, pk=review_id)
             score_old = review.score
             rating_new = (title.rating * count + score - score_old) / (count)
         else:
-            count = 1 if count == 0 else count
-            rating_new = (title.rating * (count - 1) + score) / (count)
-        title.rating = rating_new
+            rating_new = (title.rating * count + score) / (count + 1)
+        title.rating = round(rating_new)
         title.save()
 
     def perform_create(self, serializer):
         title_id = serializer.context['view'].kwargs['title_id']
         self.rating_calculation(serializer, False)
         serializer.save(author=self.request.user,
-                        title=Title.objects.get(pk=title_id))
+                        title=get_object_or_404(Title, pk=title_id))
 
     def perform_update(self, serializer):
         self.rating_calculation(serializer, True)
@@ -126,7 +128,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review_id = serializer.context['view'].kwargs['review_id']
         serializer.save(author=self.request.user,
-                        review=Review.objects.get(pk=review_id))
+                        review=get_object_or_404(Review, pk=review_id))
 
     def get_queryset(self):
         return Comment.objects.filter(review=self.kwargs['review_id'])
