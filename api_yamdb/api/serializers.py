@@ -139,10 +139,13 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=100, required=False)
-    last_name = serializers.CharField(max_length=100, required=False)
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+    bio = serializers.CharField(required=False)
+    #role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'], read_only=True)
 
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
+        #read_only_fields = ('role',)
