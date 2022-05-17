@@ -1,10 +1,12 @@
 import datetime as dt
 
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Title, Genre, Category, Review, Comment
-from users.models import User
+
+User = get_user_model()
 
 
 class CurrentTitleDefault(object):
@@ -89,7 +91,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True,
                                           default=DefUser)
-
     title = serializers.HiddenField(default=CurrentTitleDefault())
 
     class Meta:
@@ -115,10 +116,17 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=100, required=False)
-    last_name = serializers.CharField(max_length=100, required=False)
+    first_name = serializers.CharField(max_length=150, required=False)
+    last_name = serializers.CharField(max_length=150, required=False)
+    bio = serializers.CharField(required=False)
+    role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'],
+                                   required=False)
 
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
+
+
+class MeSerializer(UserSerializer):
+    role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'], read_only=True)
