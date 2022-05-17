@@ -14,9 +14,10 @@ from reviews.models import Title, Review, Comment, Genre, Category
 from .serializers import TitleSerializer, TitleSerializerPost
 from .serializers import ReviewSerializer, CommentSerializer
 from .serializers import GenreSerilizer, CategorySerializer, UserSerializer
-from .permissions import IsAdminOrReadOnlyPermission, IsAdminPermission
-from .permissions import AuthorOrReadOnly, ReadOnly, OpenAll, IsAdminOrSuperuserPermission
-from .permissions import OnlyAuthenticated, AuthorizedPermission
+from .permissions import IsAdminOrReadOnlyPermission
+from .permissions import IsAdminOrSuperuserPermission
+from .permissions import AuthorOrReadOnly, ReadOnly
+from .permissions import AuthorizedPermission
 from .serializers import MeSerializer
 
 User = get_user_model()

@@ -129,4 +129,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(UserSerializer):
-    role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'], read_only=True)
+    role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'],
+                                   read_only=True)
