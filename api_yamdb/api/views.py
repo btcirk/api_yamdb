@@ -3,13 +3,17 @@ from rest_framework import viewsets, filters, mixins
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from reviews.models import Title, Review, Comment, Genre, Category
 
 from .serializers import TitleSerializer, TitleSerializerPost
 from .serializers import ReviewSerializer, CommentSerializer
 from .serializers import GenreSerilizer, CategorySerializer, UserSerializer
 from .permissions import IsAdminOrReadOnlyPermission, IsAdminPermission
-from .permissions import AuthorOrReadOnly, ReadOnly, OpenAll
+from .permissions import AuthorOrReadOnly, ReadOnly, OpenAll, IsAdminOrSuperuserPermission
+from .permissions import OnlyAuthenticated, AuthorizedPermission
 
 User = get_user_model()
 
@@ -17,11 +21,20 @@ User = get_user_model()
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdminPermission,)
+    permission_classes = (IsAdminOrSuperuserPermission,)
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
+
+    @action(detail=False, url_path='me', methods=['get', 'patch'],
+            permission_classes = [AuthorizedPermission]
+            )
+    def me(self, request):
+        print(request.user)
+        user = User.objects.get(username=request.user)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
 
 class ListCreateDestroyViewSet(
@@ -39,6 +52,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -49,6 +63,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
