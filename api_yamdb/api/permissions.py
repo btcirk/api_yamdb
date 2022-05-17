@@ -67,6 +67,7 @@ class IsAdminOrSuperuserPermission(permissions.BasePermission):
         return (request.user.role in admin_role
                 or request.user.is_superuser)
 
+
 class AuthorizedPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):

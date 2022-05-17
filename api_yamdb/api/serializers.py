@@ -1,10 +1,7 @@
 import datetime as dt
-from email.policy import default
 
-from django.forms import SlugField
 from rest_framework import serializers
-from rest_framework.serializers import SlugRelatedField
-from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Title, Genre, Category, Review, Comment
 from users.models import User
@@ -33,6 +30,10 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Category
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
 
 
 class GenreSerilizer(serializers.ModelSerializer):
@@ -40,35 +41,10 @@ class GenreSerilizer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genre
-
-
-#class GenreSerilizer(serializers.ModelSerializer):
-#    slug = SlugField(
-#        validators = [
-#            UniqueValidator(
-#                queryset=Genre.objects.all(),
-#                message='Поле slug каждой категории должно быть уникальным'
-#            )
-#        ]
-#    )
-#    class Meta:
-#        fields = ('name', 'slug')
-#        model = Genre
-
-
-# class CategorySerializer(serializers.ModelSerializer):
-#    slug = SlugField(
-#        validators = [
-#            UniqueValidator(
-#                queryset=Category.objects.all(),
-#                message='Поле slug каждой категории должно быть уникальным'
-#            )
-#        ]
-#    )
-#
-#    class Meta:
-#        fields = ('name', 'slug')
-#        model = Category
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
 
 
 class TitleSerializer(serializers.ModelSerializer):
