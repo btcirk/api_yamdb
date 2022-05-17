@@ -32,11 +32,12 @@ class UsersViewSet(viewsets.ModelViewSet):
             )
     def me(self, request):
         user = User.objects.get(username=request.user)
-        serializer = self.get_serializer(user, data=request.data)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ListCreateDestroyViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin,
