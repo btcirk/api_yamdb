@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as myfilterset
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, filters, mixins, status
@@ -74,12 +75,35 @@ class GenreViewSet(ListCreateDestroyViewSet):
     lookup_field = 'slug'
 
 
+class TitleFilter(myfilterset.FilterSet):
+    name = myfilterset.CharFilter(
+        field_name='name',
+        lookup_expr='icontains'
+    )
+    year = myfilterset.NumberFilter(
+        field_name='year',
+        lookup_expr='icontains'
+    )
+    genre = myfilterset.CharFilter(
+        field_name='genre__slug',
+        lookup_expr='icontains'
+    )
+    category = myfilterset.CharFilter(
+        field_name='category__slug',
+        lookup_expr='icontains'
+    )
+
+    class Meta:
+        model = Title
+        fields = ('name', 'year', 'genre', 'category',)
+
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnlyPermission,)
     pagination_class = PageNumberPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name', 'year')
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
