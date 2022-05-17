@@ -1,13 +1,12 @@
 import datetime as dt
-from email.policy import default
 
-from django.forms import SlugField
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework.serializers import SlugRelatedField
-from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import Title, Genre, Category, Review, Comment
-from users.models import User
+
+User = get_user_model()
 
 
 class CurrentTitleDefault(object):
@@ -40,35 +39,6 @@ class GenreSerilizer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genre
-
-
-#class GenreSerilizer(serializers.ModelSerializer):
-#    slug = SlugField(
-#        validators = [
-#            UniqueValidator(
-#                queryset=Genre.objects.all(),
-#                message='Поле slug каждой категории должно быть уникальным'
-#            )
-#        ]
-#    )
-#    class Meta:
-#        fields = ('name', 'slug')
-#        model = Genre
-
-
-# class CategorySerializer(serializers.ModelSerializer):
-#    slug = SlugField(
-#        validators = [
-#            UniqueValidator(
-#                queryset=Category.objects.all(),
-#                message='Поле slug каждой категории должно быть уникальным'
-#            )
-#        ]
-#    )
-#
-#    class Meta:
-#        fields = ('name', 'slug')
-#        model = Category
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -113,7 +83,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(slug_field='username',
                                           read_only=True,
                                           default=DefUser)
-
     title = serializers.HiddenField(default=CurrentTitleDefault())
 
     class Meta:
@@ -142,10 +111,14 @@ class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=150, required=False)
     last_name = serializers.CharField(max_length=150, required=False)
     bio = serializers.CharField(required=False)
-    #role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'], read_only=True)
+    role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'],
+                                   required=False)
 
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
-        #read_only_fields = ('role',)
+
+
+class MeSerializer(UserSerializer):
+    role = serializers.ChoiceField(choices=['admin', 'moderator', 'user'], read_only=True)

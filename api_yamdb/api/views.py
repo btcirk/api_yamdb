@@ -16,6 +16,7 @@ from .serializers import GenreSerilizer, CategorySerializer, UserSerializer
 from .permissions import IsAdminOrReadOnlyPermission, IsAdminPermission
 from .permissions import AuthorOrReadOnly, ReadOnly, OpenAll, IsAdminOrSuperuserPermission
 from .permissions import OnlyAuthenticated, AuthorizedPermission
+from .serializers import MeSerializer
 
 User = get_user_model()
 
@@ -29,8 +30,13 @@ class UsersViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
     lookup_field = 'username'
 
+    def get_serializer_class(self):
+        if (self.request.method == 'PATCH' and self.action == 'me'):
+            return MeSerializer
+        return UserSerializer
+
     @action(detail=False, url_path='me', methods=['get', 'patch'],
-            permission_classes = [AuthorizedPermission]
+            permission_classes=[AuthorizedPermission]
             )
     def me(self, request):
         user = User.objects.get(username=request.user)
